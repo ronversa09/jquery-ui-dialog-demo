@@ -1,4 +1,7 @@
+var dialog;
+
 $(function () {
+    
     let counter = 1;
 
     const fakeData = [
@@ -15,165 +18,175 @@ $(function () {
     ];
 
     function renderTable(data) {
-      const tbody = $("#contacts-table tbody");
-      tbody.empty();
-      counter = 1; // reset for fresh rendering
-      $.each(data, function (index, item) {
-        const row = `
-          <tr data-index="${index}">
-            <td>${counter++}</td>
-            <td>${item.name}</td>
-            <td>${item.email}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-danger delete-btn">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-        tbody.append(row);
-      });
+        const tbody = $("#contacts-table tbody");
+        tbody.empty();
+        counter = 1; // reset for fresh rendering
+        $.each(data, function (index, item) {
+            const row = `
+            <tr data-index="${index}">
+                <td>${counter++}</td>
+                <td>${item.name}</td>
+                <td>${item.email}</td>
+                <td class="text-end">
+                <button class="btn btn-sm btn-danger delete-btn">
+                    <i class="bi bi-trash"></i>
+                </button>
+                </td>
+            </tr>
+            `;
+            tbody.append(row);
+        });
     }
 
     renderTable(fakeData);
 
     $("#save-btn").on("click", function () {
-          const name = $("#name").val().trim();
-          const email = $("#email").val().trim();
 
-          // Simulated fake array for checking
-          const isDuplicate = fakeData.some(item =>
-              item.name.toLowerCase() === name.toLowerCase() ||
-              item.email.toLowerCase() === email.toLowerCase()
-          );
+        const name = $("#name").val().trim();
+        const email = $("#email").val().trim();
 
-          const isValidName = /^[A-Za-zÀ-ÿ'.-]{2,}( [A-Za-zÀ-ÿ'.-]{2,})+$/.test(name);
-          const isValidEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-          
+        // Simulated fake array for checking
+        const isDuplicate = fakeData.some(item =>
+            item.name.toLowerCase() === name.toLowerCase() ||
+            item.email.toLowerCase() === email.toLowerCase()
+        );
 
-          if (name === "" || email === "") {
-              $("#validation-dialog").dialog({
-                  title: "Validation Error",
-                  modal: true,
-                  open: function () {
-                      const $dialog = $(this).closest(".ui-dialog");
-                      const $btns = $dialog.find(".ui-dialog-buttonset button");
-                      $btns
-                          .addClass("btn btn-danger btn-sm")
-                          .html('<i class="bi bi-x-circle me-1"></i> Close');
+        const isValidName = /^[A-Za-zÀ-ÿ'.-]{2,}( [A-Za-zÀ-ÿ'.-]{2,})+$/.test(name);
+        const isValidEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+        
 
-                      $dialog.find(".ui-dialog-titlebar-close")
-                          .show()
-                          .removeClass()
-                          .addClass("ui-dialog-titlebar-close btn-close")
-                          .html("&times;");
-                  },
-                  buttons: {
-                      OK: function () {
-                          $(this).dialog("close");
-                      }
-                  }
-              });
+        if (name === "" || email === "") {
+
+            $("#validation-dialog").dialog({
+                title: "Validation Error",
+                modal: true,
+                open: function () {
+                    const $dialog = $(this).closest(".ui-dialog");
+                    const $btns = $dialog.find(".ui-dialog-buttonset button");
+                    $btns
+                        .addClass("btn btn-danger btn-sm")
+                        .html('<i class="bi bi-x-circle me-1"></i> Close');
+
+                    $dialog.find(".ui-dialog-titlebar-close")
+                        .show()
+                        .removeClass()
+                        .addClass("ui-dialog-titlebar-close btn-close")
+                        .html("&times;");
+                },
+                buttons: {
+                    OK: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
           } else if (!isValidName) {
-              $("<div title='Invalid Name'><p class='text-danger mb-0'>Please enter a full name (first and last name only, no numbers or special characters).</p></div>").dialog({
-                  modal: true,
-                  open: function () {
-                      const $dialog = $(this).closest(".ui-dialog");
-                      const $btns = $dialog.find(".ui-dialog-buttonset button");
-                      $btns
-                          .addClass("btn btn-danger btn-sm")
-                          .html('<i class="bi bi-x-circle me-1"></i> Close');
 
-                      $dialog.find(".ui-dialog-titlebar-close")
-                          .show()
-                          .removeClass()
-                          .addClass("ui-dialog-titlebar-close btn-close")
-                          .html("&times;");
-                  },
-                  buttons: {
-                      Close: function () {
-                          $(this).dialog("close");
-                      }
-                  }
-              });
-              return; // Stop further processing
+                let html = `<div>
+                            <p class='text-danger mb-0'>
+                                Please enter a full name (first and last name only, no numbers or special characters).
+                            </p>
+                        </div>`;
+
+                $(html).dialog({
+                    modal: true,
+                    title: 'Invalid Name',
+                    open: function () {
+                        const $dialog = $(this).closest(".ui-dialog");
+                        const $btns = $dialog.find(".ui-dialog-buttonset button");
+                        $btns
+                            .addClass("btn btn-danger btn-sm")
+                            .html('<i class="bi bi-x-circle me-1"></i> Close');
+
+                        $dialog.find(".ui-dialog-titlebar-close")
+                            .show()
+                            .removeClass()
+                            .addClass("ui-dialog-titlebar-close btn-close")
+                            .html("&times;");
+                    },
+                    buttons: {
+                        Close: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                return; // Stop further processing
+
           } else if (!isValidEmail) {
-              // Show email format error dialog
-              $("<div title='Invalid Email'><p class='text-danger mb-0'>Please enter a valid email address.</p></div>").dialog({
-                  modal: true,
-                  open: function () {
-                      const $dialog = $(this).closest(".ui-dialog");
-                      const $btns = $dialog.find(".ui-dialog-buttonset button");
-                      $btns
-                          .addClass("btn btn-danger btn-sm")
-                          .html('<i class="bi bi-x-circle me-1"></i> Close');
 
-                      $dialog.find(".ui-dialog-titlebar-close")
-                          .show()
-                          .removeClass()
-                          .addClass("ui-dialog-titlebar-close btn-close")
-                          .html("&times;");
-                  },
-                  buttons: {
-                      Close: function () {
-                          $(this).dialog("close");
-                      }
-                  }
-              });
+                // Show email format error dialog
+                $("<div title='Invalid Email'><p class='text-danger mb-0'>Please enter a valid email address.</p></div>").dialog({
+                    modal: true,
+                    open: function () {
+                        const $dialog = $(this).closest(".ui-dialog");
+                        const $btns = $dialog.find(".ui-dialog-buttonset button");
+                        $btns
+                            .addClass("btn btn-danger btn-sm")
+                            .html('<i class="bi bi-x-circle me-1"></i> Close');
+
+                        $dialog.find(".ui-dialog-titlebar-close")
+                            .show()
+                            .removeClass()
+                            .addClass("ui-dialog-titlebar-close btn-close")
+                            .html("&times;");
+                    },
+                    buttons: {
+                        Close: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
 
           } else if (isDuplicate) {
-              // Show duplicate dialog
-              $("<div title='Duplicate Entry'><p class='text-danger mb-0'>Name or Email already exists.</p></div>").dialog({
-                  title: "Duplicate Entry",
-                  modal: true,
-                  open: function () {
-                      const $dialog = $(this).closest(".ui-dialog");
-                      const $btns = $dialog.find(".ui-dialog-buttonset button");
-                      $btns
-                          .addClass("btn btn-danger btn-sm")
-                          .html('<i class="bi bi-x-circle me-1"></i> Close');
 
-                      $dialog.find(".ui-dialog-titlebar-close")
-                          .show()
-                          .removeClass()
-                          .addClass("ui-dialog-titlebar-close btn-close")
-                          .html("&times;");
-                  },
-                  buttons: {
-                      Error: function () {
-                          $(this).dialog("close");
-                      }
-                  }
-              });
+                // Show duplicate dialog
+                dialog = $("<div title='Duplicate Entry'><p class='text-danger mb-0'>Name or Email already exists.</p></div>").dialog({
+                    title: "Duplicate Entry",
+                    modal: true,
+                    open: function () {},
+                    buttons: {
+                        Error: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                dialog.closest(".ui-dialog").find(".ui-dialog-titlebar-close").hide();
+                dialog.closest(".ui-dialog").find(".ui-dialog-buttonset button")
+                        .addClass("btn btn-danger btn-sm")
+                            .html('<i class="bi bi-x-circle me-1"></i> Close');
+
           } else {
-              fakeData.push({ name, email });
-              renderTable(fakeData);
-              $("#name").val("");
-              $("#email").val("");
 
-              // Show success dialog
-              $("<div title='Success'><p class='text-success mb-0'>Contact saved successfully.</p></div>").dialog({
-                  title: "Success",
-                  modal: true,
-                  open: function () {
-                      const $dialog = $(this).closest(".ui-dialog");
-                      const $btns = $dialog.find(".ui-dialog-buttonset button");
-                      $btns
-                          .addClass("btn btn-success btn-sm")
-                          .html('<i class="bi bi-check-circle me-1"></i> OK');
+                fakeData.push({ name, email });
+                renderTable(fakeData);
+                $("#name").val("");
+                $("#email").val("");
 
-                      $dialog.find(".ui-dialog-titlebar-close")
-                          .show()
-                          .removeClass()
-                          .addClass("ui-dialog-titlebar-close btn-close")
-                          .html("&times;");
-                  },
-                  buttons: {
-                      OK: function () {
-                          $(this).dialog("close");
-                      }
-                  }
-              });
+                // Show success dialog
+                $("<div title='Success'><p class='text-success mb-0'>Contact saved successfully.</p></div>").dialog({
+                    title: "Success",
+                    modal: true,
+                    open: function () {
+                        const $dialog = $(this).closest(".ui-dialog");
+                        const $btns = $dialog.find(".ui-dialog-buttonset button");
+                        $btns
+                            .addClass("btn btn-success btn-sm")
+                            .html('<i class="bi bi-check-circle me-1"></i> OK');
+
+                        $dialog.find(".ui-dialog-titlebar-close")
+                            .show()
+                            .removeClass()
+                            .addClass("ui-dialog-titlebar-close btn-close")
+                            .html("&times;");
+                    },
+                    buttons: {
+                        OK: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
           }
       });
 
